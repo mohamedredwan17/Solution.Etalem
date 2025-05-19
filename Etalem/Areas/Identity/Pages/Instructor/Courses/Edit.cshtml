@@ -1,0 +1,35 @@
+﻿@page "{id:int}"
+@model Etalem.Areas.Identity.Pages.Instructor.Courses.EditModel
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<h2>Edit Course</h2>
+
+<form method="post">
+    
+
+    <div class="form-group">
+        <label asp-for="Course.Title"></label>
+        <input asp-for="Course.Title" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.ShortDescription"></label>
+        <textarea asp-for="Course.ShortDescription" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.Price"></label>
+        <input asp-for="Course.Price" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Categories</label>
+        @foreach (var category in Model.AllCategories)
+        {
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="@category.Id" name="SelectedCategoryIds" checked="@(Model.SelectedCategoryIds.Contains(category.Id))" />
+                <label class="form-check-label">@category.Name</label>
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>

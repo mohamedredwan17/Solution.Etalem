@@ -1,0 +1,199 @@
+﻿@using Etalem.Data
+@inject ApplicationDbContext _context
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Etalem</title>
+    <script type="importmap"></script>
+    @* <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> *@
+    <link rel="stylesheet" href="~/css/tailwind.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Etalem.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="bg-white shadow-md p-4">
+            <div class="container mx-auto flex items-center justify-between">
+                <!-- Left Section: Logo and Main Links -->
+                <div class="flex items-center space-x-4">
+                    <a class="text-xl font-bold text-gray-900 md:text-2xl" asp-area="" asp-page="/Index">
+                        <svg class="h-8 w-8 text-blue-600 inline pb-1 " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Etalem
+                    </a>
+
+                    <!-- Main Links (Visible on Desktop) -->
+                    <div class="hidden md:flex md:items-center md:space-x-4">
+                        <ul class="flex space-x-4 items-center">
+                            <li>
+                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-area="" asp-page="/Index">Home</a>
+
+                            </li>
+                            <li>
+                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-area="" asp-page="/Courses">Courses</a>
+
+                            </li>
+
+
+                            <li class="relative inline-block" id="categoryDropdown">
+                                <button id="dropdownButton" class="flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 focus:outline-none">
+                                    Categories
+                                    <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <div id="dropdownMenu" class="absolute left-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50">
+                                    <div class="py-2">
+                                        @foreach (var category in _context.Categories.ToList())
+                                        {
+                                            <a href="/Courses?categoryId=@category.Id" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                @category.Name
+                                            </a>
+                                        }
+                                        <a href="/Categories" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
+                                            View All Categories
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+
+
+
+
+
+                            
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right Section: Login/Logout Links and Hamburger Toggle -->
+                <div class="flex items-center space-x-4">
+                    <!-- Login/Logout Links (Visible on Desktop) -->
+                    <div class="hidden md:block">
+                        <partial name="_LoginPartial" />
+                    </div>
+
+                    <!-- Hamburger Toggle for Mobile -->
+                    <button id="nav-toggle" class="md:hidden flex items-center cursor-pointer">
+                        <svg id="hamburger-icon" class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg id="close-icon" class="w-6 h-6 text-gray-700 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="nav-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-white shadow-md p-4 z-50">
+                <ul class="flex flex-col space-y-2  ">
+                    <li>
+                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-area="" asp-page="/Index">Home</a>
+                    </li>
+                    <li>
+                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-area="" asp-page="/Courses">Courses</a>
+                    </li>
+                    <li class="relative" id="mobileCategoryDropdown">
+                        <button id="mobileDropdownButton" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:text-blue-600 focus:outline-none">
+                            <span>Categories</span>
+                            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <div id="mobileDropdownMenu" class="hidden bg-white mt-2 rounded-md shadow-lg w-full z-50">
+                            <div class="py-2">
+                                @foreach (var category in _context.Categories.ToList())
+                                {
+                                    <a href="/Courses?categoryId=@category.Id" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        @category.Name
+                                    </a>
+                                }
+                                <a href="/Categories" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
+                                    View All Categories
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+
+
+
+                </ul>
+                <partial name="_LoginPartial" />
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - Etalem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButton = document.getElementById('nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            if (toggleButton && navMenu && hamburgerIcon && closeIcon) {
+                toggleButton.addEventListener('click', function () {
+                    navMenu.classList.toggle('hidden');
+                    hamburgerIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                });
+            } else {
+                console.error('One or more DOM elements not found for navigation toggle.');
+            }
+        });
+
+        const dropdownButton = document.getElementById("dropdownButton");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+
+        dropdownButton.addEventListener("click", function (e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("hidden");
+        });
+
+        // لو ضغط في أي مكان خارج المينيو تقفل
+        document.addEventListener("click", function (e) {
+            if (!dropdownMenu.contains(e.target) && !dropdownButton.contains(e.target)) {
+                dropdownMenu.classList.add("hidden");
+            }
+        });
+
+                // موبايل دروب داون
+        const mobileDropdownButton = document.getElementById("mobileDropdownButton");
+        const mobileDropdownMenu = document.getElementById("mobileDropdownMenu");
+
+        mobileDropdownButton?.addEventListener("click", function (e) {
+            e.stopPropagation();
+            mobileDropdownMenu.classList.toggle("hidden");
+        });
+
+        // يقفل القائمة لو ضغطت برة
+        document.addEventListener("click", function (e) {
+            if (!mobileDropdownMenu.contains(e.target) && !mobileDropdownButton.contains(e.target)) {
+                mobileDropdownMenu.classList.add("hidden");
+            }
+        });
+
+
+    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,57 @@
+﻿@inject SignInManager<IdentityUser> SignInManager
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+<ul class="space-y-2">
+    @if (User.IsInRole("Admin"))
+    {
+        <li>
+            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded"  asp-page="/Admin/Dashboard">Admin Dashboard</a>
+        </li>
+    }
+    @if (User.IsInRole("Instructor"))
+    {
+        <li>
+            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-page="/Instructor/Dashboard">Instructor Dashboard</a>
+        </li>
+    }
+    @if (User.IsInRole("Student"))
+    {
+        <li>
+            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-area="" asp-page="/StudentPage">Student Dashboard</a>
+        </li>
+    }
+    <li>
+        <a class="@GetNavLinkClass(ManageNavPages.IndexNavClass(ViewContext))" id="profile" asp-page="./Index">Profile</a>
+    </li>
+    <li>
+        <a class="@GetNavLinkClass(ManageNavPages.EmailNavClass(ViewContext))" id="email" asp-page="./Email">Email</a>
+    </li>
+    <li>
+        <a class="@GetNavLinkClass(ManageNavPages.ChangePasswordNavClass(ViewContext))" id="change-password" asp-page="./ChangePassword">Password</a>
+    </li>
+    @if (hasExternalLogins)
+    {
+        <li id="external-logins">
+            <a class="@GetNavLinkClass(ManageNavPages.ExternalLoginsNavClass(ViewContext))" id="external-login" asp-page="./ExternalLogins">External logins</a>
+        </li>
+    }
+    <li>
+        <a class="@GetNavLinkClass(ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext))" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a>
+    </li>
+    <li>
+        <a class="@GetNavLinkClass(ManageNavPages.PersonalDataNavClass(ViewContext))" id="personal-data" asp-page="./PersonalData">Personal data</a>
+    </li>
+   
+</ul>
+
+@functions {
+    string GetNavLinkClass(string navClass)
+    {
+        string activeClass = "block px-4 py-2 text-white bg-gray-500 rounded";
+        string inactiveClass = "block px-4 py-2 text-gray-700 hover:bg-gray-200 rounded";
+
+        // The NavClass helpers typically return "active" class when the page is active
+        return !string.IsNullOrEmpty(navClass) ? activeClass : inactiveClass;
+    }
+}

@@ -1,0 +1,15 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+}
+
+<header>
+    <div class="min-h-screen flex items-center justify-center bg-red-50">
+        <div class="bg-white shadow-xl rounded-xl p-10 text-center">
+    <h1 class="text-3xl font-bold text-red-600 mb-4">@ViewData["Title"]</h1>
+            <p class="text-gray-700">You do not have permission to access this page.</p>
+            <a asp-page="/Index" class="mt-6 inline-block text-blue-600 hover:underline">Back to Home</a>
+        </div>
+    </div>
+</header>

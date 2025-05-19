@@ -1,0 +1,55 @@
+﻿@page
+@model Etalem.Areas.Identity.Pages.Instructor.Courses.IndexModel
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<h2>My Courses</h2>
+
+
+<div class="min-h-screen bg-gray-100 py-10 px-4">
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-2xl p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Categories</h2>
+            <a asp-page="./Create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl">
+                + Add Course
+            </a>
+        </div>
+
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-2 text-left font-medium text-gray-600">Title</th>
+                    <th class="px-4 py-2 text-left font-medium text-gray-600">Price</th>
+                    <th class="px-4 py-2 text-left font-medium text-gray-600">Categories</th>
+                    <th class="px-4 py-2 text-left font-medium text-gray-600"></th>
+
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach (var course in Model.Courses)
+                {
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">@course.Title</td>
+                        <td class="px-4 py-2">@course.Price</td>
+                        <td class="px-4 py-2">@course.Categories</td> @*@course.Categories.First()*@
+                        <td class="px-4 py-2 space-x-2">
+                            <a asp-page="./Edit" asp-route-id="@course.Id"
+                               class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-xl text-xs">
+                                Edit
+                            </a>
+
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@course.Id" class="inline">
+                                <button type="submit"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-xl text-xs"
+                                        onclick="return confirm('Are you sure you want to delete this category?')">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

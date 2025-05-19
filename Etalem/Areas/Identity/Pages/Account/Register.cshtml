@@ -1,0 +1,56 @@
+﻿@page
+@model Etalem.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container mx-auto flex min-h-[80vh] items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+        <div class="rounded-xl bg-white p-8 shadow-lg">
+            <div class="mb-6 text-center">
+                <h1 class="text-2xl font-bold text-gray-900">@ViewData["Title"]</h1>
+                <p class="mt-2 text-gray-600">Fill out the form to create your account</p>
+            </div>
+
+            <form method="post" class="space-y-4">
+                <div>
+                    <label asp-for="Input.Email" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="Input.Email" class="mt-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    <span asp-validation-for="Input.Email" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Input.Password" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="Input.Password" class="mt-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    <span asp-validation-for="Input.Password" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Input.ConfirmPassword" class="block text-sm font-medium text-gray-700"></label>
+                    <input asp-for="Input.ConfirmPassword" class="mt-1 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-red-600 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="Input.Role" class="block text-sm font-medium text-gray-700"></label>
+                    <select asp-for="Input.Role" class="mt-1 shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="Student" selected>Student</option>
+                        <option value="Instructor">Instructor</option>
+                    </select>
+                    <span asp-validation-for="Input.Role" class="text-red-600 text-sm"></span>
+                </div>
+                <div asp-validation-summary="All" class="text-red-600 text-sm"></div>
+                <div>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Create account</button>
+                </div>
+            </form>
+
+            <div class="mt-6 text-center text-sm">
+                <p>
+                    Already have an account? <a asp-page="./Login" class="font-medium text-blue-600 hover:text-blue-500">Log in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
