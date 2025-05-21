@@ -1,7 +1,10 @@
 ﻿using Etalem.Data;
 using Etalem.Data.Repo;
 using Etalem.Data.Repo.Interfaces;
+using Etalem.Infrastructure.Services;
+using Etalem.MappingProfiles;
 using Etalem.Models;
+using Etalem.Models.DTOs.Course;
 using Etalem.Services;
 using Etalem.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -39,9 +42,12 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddScoped<ICourseService, CourseService>();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<CourseService>();
+builder.Services.AddScoped<IFileService, FileService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
 

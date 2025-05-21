@@ -13,22 +13,27 @@ namespace Etalem.Models
     public class Course
     {
         public int Id { get; set; }
-
-        public string Title { get; set; } = default!;
-        public string ShortDescription { get; set; } = default!;
-        public string? ImageUrl { get; set; }
-
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string ShortDescription { get; set; }
         public CourseLevel Level { get; set; }
-
-        // العلاقة مع الـ Instructor (ApplicationUser)
-        public string InstructorId { get; set; } = default!;
-        public IdentityUser Instructor { get; set; } = default!;
-
-        public decimal? Price { get; set; }
-        public double? Rating { get; set; }
-        public int? StudentsCount { get; set; }
-
+        public string? ThumbnailUrl { get; set; }
+        public decimal Price { get; set; }
+        public bool IsFree => Price == 0;
+        public bool IsPublished { get; set; }
+        public bool IsApproved { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public ICollection<CourseCategory> CourseCategories { get; set; } = new List<CourseCategory>();
+        public DateTime? UpdatedAt { get; set; } 
+        public string LearningObjectives { get; set; } // أهداف التعلم
+        public string Requirements { get; set; } // متطلبات الكورس
+        public int DurationInMinutes { get; set; } // مدة الكورس بالدقائق
+        public int EnrollmentCount { get; set; } // عدد المسجلين (محسوب)
+        public double AverageRating { get; set; } // متوسط التقييم (محسوب)
+
+        // العلاقات
+        public string InstructorId { get; set; }
+        public IdentityUser  Instructor { get; set; }
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

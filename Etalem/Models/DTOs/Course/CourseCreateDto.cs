@@ -2,6 +2,7 @@
 {
     public class CourseCreateDto
     {
+        public int Id { get; set; }
         public string Title { get; set; } = default!;
         public string ShortDescription { get; set; } = default!;
         public string? ImageUrl { get; set; }

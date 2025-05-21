@@ -2,9 +2,10 @@
 
 namespace Etalem.Data.Repo.Interfaces
 {
-    public interface ICourseRepository: IRepository<Course>
+    public interface ICourseRepository : IRepository<Course>
     {
-        Task<IEnumerable<Course>> GetCoursesWithDetailsAsync();
-        Task<Course?> GetCourseWithDetailsAsync(int id);
+        // دوال إضافية خاصة بالكورسات لو احتجناها
+        Task<Course> GetCourseWithDetailsAsync(int id);
+        Task<IEnumerable<Course>> GetCoursesByInstructorAsync(string instructorId);
     }
 }

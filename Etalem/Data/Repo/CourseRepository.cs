@@ -13,22 +13,20 @@ namespace Etalem.Data.Repo
 
         }
 
-        public async Task<IEnumerable<Course>> GetCoursesWithDetailsAsync()
+        public async Task<Course> GetCourseWithDetailsAsync(int id)
         {
             return await _context.Courses
+                .Include(c => c.Category)
                 .Include(c => c.Instructor)
-                .Include(c => c.CourseCategories)
-                    .ThenInclude(cc => cc.Category)
-                .ToListAsync();
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<Course?> GetCourseWithDetailsAsync(int id)
+        public async Task<IEnumerable<Course>> GetCoursesByInstructorAsync(string instructorId)
         {
             return await _context.Courses
-                .Include(c => c.Instructor)
-                .Include(c => c.CourseCategories)
-                    .ThenInclude(cc => cc.Category)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .Include(c => c.Category)
+                .Where(c => c.InstructorId == instructorId)
+                .ToListAsync();
         }
     }
 }

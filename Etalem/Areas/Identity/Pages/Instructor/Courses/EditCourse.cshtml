@@ -1,0 +1,103 @@
+﻿@page "{id:int}"
+@model Etalem.Areas.Identity.Pages.Instructor.Courses.EditCourseModel
+
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">Edit Course</h1>
+
+<div class="text-red-600 mb-4">
+    @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+    {
+        <p>@error.ErrorMessage</p>
+    }
+</div>
+
+<form method="post" enctype="multipart/form-data" class="space-y-6 max-w-2xl mx-auto">
+    <input asp-for="Course.Id" type="hidden" />
+    <input asp-for="Course.ThumbnailUrl" type="hidden" />
+
+    <div>
+        <label asp-for="Course.Title" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Course.Title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Course.Title" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.Description" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <textarea asp-for="Course.Description" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"></textarea>
+        <span asp-validation-for="Course.Description" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.ShortDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <textarea asp-for="Course.ShortDescription" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"></textarea>
+        <span asp-validation-for="Course.ShortDescription" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.Level" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <select asp-for="Course.Level" asp-items="Html.GetEnumSelectList<Etalem.Models.CourseLevel>()" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200">
+            <option value="">Select Level</option>
+        </select>
+        <span asp-validation-for="Course.Level" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.Price" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Course.Price" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Course.Price" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.ThumbnailFile" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Course.ThumbnailFile" type="file" accept="image/*" class="mt-1 block w-full text-gray-700 dark:text-gray-300" data-val="false" />
+        <span asp-validation-for="Course.ThumbnailFile" class="text-red-600 text-sm"></span>
+        @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+        {
+            <img src="@Model.Course.ThumbnailUrl" alt="Current Thumbnail" class="mt-2 w-32 h-32 object-cover rounded" />
+        }
+    </div>
+
+    <div>
+        <label asp-for="Course.LearningObjectives" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <textarea asp-for="Course.LearningObjectives" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"></textarea>
+        <span asp-validation-for="Course.LearningObjectives" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.Requirements" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <textarea asp-for="Course.Requirements" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"></textarea>
+        <span asp-validation-for="Course.Requirements" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.DurationInMinutes" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Course.DurationInMinutes" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Course.DurationInMinutes" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.CategoryId" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <select asp-for="Course.CategoryId" asp-items="Model.Categories" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200">
+            <option value="">Select Category</option>
+        </select>
+        <span asp-validation-for="Course.CategoryId" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Course.IsPublished" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Course.IsPublished" type="checkbox" class="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600" />
+        <span asp-validation-for="Course.IsPublished" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">Save Changes</button>
+        <a asp-page="/Instructor/Courses" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

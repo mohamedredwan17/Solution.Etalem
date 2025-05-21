@@ -1,86 +1,127 @@
 ﻿using AutoMapper;
 using Etalem.Data.Repo.Interfaces;
-using Etalem.Models.DTOs.Course;
+using Etalem.Infrastructure.Services;
 using Etalem.Models;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Etalem.Models.DTOs.Course;
 using Etalem.Services.Interfaces;
 
 namespace Etalem.Services
 {
-    public class CourseService : ICourseService
+    public class CourseService
     {
         private readonly ICourseRepository _courseRepository;
+        private readonly IFileService _fileService;
         private readonly IMapper _mapper;
-        public CourseService(ICourseRepository courseRepository, IMapper mapper)
+        private readonly ILogger<CourseService> _logger;
+
+
+        public CourseService(ICourseRepository courseRepository, IFileService fileService, IMapper mapper, ILogger<CourseService> logger)
         {
             _courseRepository = courseRepository;
+            _fileService = fileService;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<IEnumerable<CourseDto>> GetCoursesByInstructorIdAsync(string instructorId)
+        public async Task<int> CreateAsync(CourseDto dto, string userId)
         {
-            var courses = await _courseRepository.GetCoursesWithDetailsAsync();
-            return _mapper.Map<IEnumerable<CourseDto>>(courses.Where(c => c.InstructorId == instructorId));
+            var course = _mapper.Map<Course>(dto);
+            course.InstructorId = userId;
+            course.CreatedAt = DateTime.UtcNow;
+            course.UpdatedAt = null;
+
+            if (dto.ThumbnailFile != null)
+            {
+                course.ThumbnailUrl = await _fileService.UploadFileAsync(dto.ThumbnailFile, "Courses");
+            }
+            else
+            {
+                course.ThumbnailUrl = "/Uploads/Courses/DefaultThumbnail.jpg";
+            }
+
+            await _courseRepository.AddAsync(course);
+            return course.Id;
         }
 
-        public async Task<IEnumerable<CourseDto>> GetAllCoursesAsync()
+        public async Task<CourseDto> GetByIdAsync(int id)
         {
-            var courses = await _courseRepository.GetCoursesWithDetailsAsync();
+            var course = await _courseRepository.GetCourseWithDetailsAsync(id);
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
+            return _mapper.Map<CourseDto>(course);
+        }
+
+        public async Task<IEnumerable<CourseDto>> GetAllAsync()
+        {
+            var courses = await _courseRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<CourseDto>>(courses);
         }
 
-        public async Task<CourseDto?> GetCourseByIdAsync(int id)
+        public async Task<IEnumerable<CourseDto>> FindAsync(Expression<Func<Course, bool>> predicate)
         {
-            var course = await _courseRepository.GetCourseWithDetailsAsync(id);
-            return course is null ? null : _mapper.Map<CourseDto>(course);
+            var courses = await _courseRepository.FindAsync(predicate);
+            return _mapper.Map<IEnumerable<CourseDto>>(courses);
         }
 
-        public async Task CreateCourseAsync(CourseCreateDto courseDto, List<int> categoryIds, string instructorId)
+        public async Task<IEnumerable<CourseDto>> GetCoursesByInstructorAsync(string instructorId)
         {
-            var course = _mapper.Map<Course>(courseDto);
-            course.InstructorId = instructorId;
-
-            course.CourseCategories = categoryIds
-                .Select(catId => new CourseCategory
-                {
-                    CategoryId = catId
-                }).ToList();
-
-            await _courseRepository.AddAsync(course);
+            var courses = await _courseRepository.GetCoursesByInstructorAsync(instructorId);
+            return _mapper.Map<IEnumerable<CourseDto>>(courses);
         }
 
-
-        public async Task UpdateCourseAsync(int id, CourseUpdateDto dto, List<int> categoryIds, string instructorId)
+        public async Task UpdateAsync(CourseDto dto)
         {
-            var existingCourse = await _courseRepository.GetCourseWithDetailsAsync(id);
-            if (existingCourse == null)
-                throw new Exception("Course not found");
-
-            // التأكد أن المستخدم هو الإنستراكتور صاحب الكورس
-            if (existingCourse.InstructorId != instructorId)
-                throw new UnauthorizedAccessException("You are not authorized to update this course");
-
-            // تحديث البيانات الأساسية
-            _mapper.Map(dto, existingCourse);
-
-            // تحديث روابط التصنيفات
-            existingCourse.CourseCategories = categoryIds.Select(cid => new CourseCategory
+            _logger.LogInformation("Updating course with ID: {CourseId}", dto.Id);
+            var course = await _courseRepository.GetByIdAsync(dto.Id);
+            if (course == null)
             {
-                CourseId = id,
-                CategoryId = cid
-            }).ToList();
+                _logger.LogWarning("Course not found: {CourseId}", dto.Id);
+                throw new Exception("Course not found");
+            }
 
-            await _courseRepository.UpdateAsync(existingCourse);
+            var oldThumbnailUrl = course.ThumbnailUrl;
+            _mapper.Map(dto, course);
+            course.UpdatedAt = DateTime.UtcNow;
+            
+
+            if (dto.ThumbnailFile != null)
+            {
+                _logger.LogInformation("Processing new ThumbnailFile for course: {CourseId}", dto.Id);
+                course.ThumbnailUrl = await _fileService.UploadFileAsync(dto.ThumbnailFile, "Courses");
+                if (!string.IsNullOrEmpty(oldThumbnailUrl) && oldThumbnailUrl != "/Uploads/Courses/DefaultThumbnail.jpg")
+                {
+                    await _fileService.DeleteFileAsync(oldThumbnailUrl);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("No new ThumbnailFile provided, keeping existing ThumbnailUrl: {ThumbnailUrl}", course.ThumbnailUrl);
+                // الاحتفاظ بـ ThumbnailUrl القديمة
+                course.ThumbnailUrl = oldThumbnailUrl;
+            }
+
+            await _courseRepository.UpdateAsync(course);
+            _logger.LogInformation("Course updated successfully: {CourseId}", dto.Id);
         }
 
-
-
-        public async Task<bool> DeleteCourseAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             var course = await _courseRepository.GetByIdAsync(id);
-            if (course == null) return false;
+            if (course == null)
+            {
+                throw new Exception("Course not found");
+            }
 
-            _courseRepository.DeleteAsync(course);
-            return true;
+            if (!string.IsNullOrEmpty(course.ThumbnailUrl) && course.ThumbnailUrl != "/Uploads/Courses/DefaultThumbnail.jpg")
+            {
+                await _fileService.DeleteFileAsync(course.ThumbnailUrl);
+            }
+
+            await _courseRepository.DeleteAsync(course);
         }
     }
 }

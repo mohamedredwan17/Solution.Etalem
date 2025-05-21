@@ -10,7 +10,7 @@ namespace Etalem.Models
         [StringLength(100)]
         public string Name { get; set; }
 
-        public ICollection<CourseCategory> CourseCategories { get; set; } = new List<CourseCategory>();
+        public List<Course> Courses { get; set; } = new List<Course>();
 
     }
 }
