@@ -223,7 +223,25 @@
                                 </svg>
                                 <h3 class="text-lg font-medium text-gray-800">@lesson.Title</h3>
                             </div>
-                            <span class="text-sm text-gray-500">@lesson.Duration mins</span>
+                            <div>
+                                <span class="text-sm text-gray-500">@lesson.Duration mins</span>
+                                <button data-lesson-id="@lesson.Id" class="toggle-lesson-content inline-flex items-center ml-2 p-1 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors duration-200">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Lesson Content (Hidden by default) -->
+                        <div id="lesson-content-@lesson.Id" class="lesson-content p-4 bg-gray-50 hidden">
+                            @if (!string.IsNullOrEmpty(lesson.Content))
+                            {
+                                <p class="text-gray-700">@lesson.Content</p>
+                            }
+                            else
+                            {
+                                <p class="text-gray-500">No content available for this lesson.</p>
+                            }
                         </div>
                     }
                 }
@@ -329,6 +347,21 @@
                 // بدء الـ Auto-Slide
                 startAutoSlide();
             }
+
+            // Toggle Lesson Content
+            document.querySelectorAll('.toggle-lesson-content').forEach(button => {
+                button.addEventListener('click', function () {
+                    const lessonId = this.getAttribute('data-lesson-id');
+                    const contentDiv = document.getElementById(`lesson-content-${lessonId}`);
+                    if (contentDiv) {
+                        if (contentDiv.classList.contains('hidden')) {
+                            contentDiv.classList.remove('hidden');
+                        } else {
+                            contentDiv.classList.add('hidden');
+                        }
+                    }
+                });
+            });
         });
     </script>
 }
