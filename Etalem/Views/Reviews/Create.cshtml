@@ -1,0 +1,66 @@
+﻿@model Etalem.Models.DTOs.ReviewDto
+
+@{
+    ViewData["Title"] = "Add Review";
+}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-900">Add a Review</h2>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Success</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Error</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+</div>
+
+<form asp-action="Create" method="post">
+    <input type="hidden" asp-for="CourseId" />
+
+    <div class="mb-4">
+        <label asp-for="Rating" class="block text-gray-700">Rating (1-5):</label>
+        <input asp-for="Rating" type="number" min="1" max="5" required class="border rounded p-2 w-full" />
+        <span asp-validation-for="Rating" class="text-red-500"></span>
+    </div>
+
+    <div class="mb-4">
+        <label asp-for="Comment" class="block text-gray-700">Comment:</label>
+        <textarea asp-for="Comment" required class="border rounded p-2 w-full"></textarea>
+        <span asp-validation-for="Comment" class="text-red-500"></span>
+    </div>
+
+    <div class="mt-6">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Review</button>
+        <a asp-action="Index" asp-route-courseId="@Model.CourseId" class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 ml-4">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    toast.style.display = 'none';
+                });
+            }, 5000);
+        });
+    </script>
+}

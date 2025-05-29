@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "All Categories";
+}
+
+<!-- Categories Section -->
+<section class="py-12 bg-gray-50 text-center">
+    <h2 class="text-2xl font-bold mb-4">All Categories</h2>
+    <p class="text-gray-600 mb-6">Browse courses by category and find the perfect match for your learning journey</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        @if (ViewBag.Categories != null)
+        {
+            @foreach (var category in ViewBag.Categories as IEnumerable<Etalem.Models.Category>)
+            {
+                var courseCount = (ViewBag.Courses as IEnumerable<Etalem.Models.DTOs.Course.CourseDto>)?.Count(c => c.CategoryId == category.Id) ?? 0;
+                var categoryIcons = ViewBag.CategoryIcons as Dictionary<string, string>;
+                var iconUrl = categoryIcons?.ContainsKey(category.Name) == true ? categoryIcons[category.Name] : "/images/icons/default.png";
+                // إضافة query string لكسر الكاش
+                var cacheBustedIconUrl = $"{iconUrl}?v={DateTime.Now.Ticks}";
+                <a href="@Url.Action("Index", "Course", new { categoryId = category.Id })" class="block">
+                    <div class="border rounded-lg p-4 shadow text-center hover:shadow-lg transition-all duration-300">
+                        <div class="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-full flex items-center justify-center">
+                            <img src="@cacheBustedIconUrl" alt="@category.Name Icon" class="w-full h-full object-cover rounded-full" onerror="this.src='/images/icons/default.png'" />
+                        </div>
+                        <h3 class="text-lg font-semibold">@category.Name</h3>
+                        <p class="text-sm text-gray-600">@courseCount courses</p>
+                    </div>
+                </a>
+            }
+        }
+        else
+        {
+            <p class="text-gray-600">No categories available.</p>
+        }
+    </div>
+</section>

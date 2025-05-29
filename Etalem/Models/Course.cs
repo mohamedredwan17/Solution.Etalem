@@ -24,16 +24,20 @@ namespace Etalem.Models
         public bool IsApproved { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; } 
-        public string LearningObjectives { get; set; } // أهداف التعلم
+        public string LearningObjectives { get; set; }
         public string Requirements { get; set; } // متطلبات الكورس
-        public int DurationInMinutes { get; set; } // مدة الكورس بالدقائق
-        public int EnrollmentCount { get; set; } // عدد المسجلين (محسوب)
-        public double AverageRating { get; set; } // متوسط التقييم (محسوب)
+        public int DurationInMinutes => Lessons?.Sum(l => l.Duration) ?? 0;
+        public int EnrollmentCount { get; set; } 
+        public double AverageRating { get; set; } 
 
-        // العلاقات
+        
         public string InstructorId { get; set; }
         public IdentityUser  Instructor { get; set; }
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
         public Category Category { get; set; }
+        public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

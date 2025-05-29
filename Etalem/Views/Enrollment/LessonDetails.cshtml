@@ -1,0 +1,174 @@
+﻿@model Etalem.Models.DTOs.Course.LessonDto
+
+@{
+    ViewData["Title"] = Model.Title + " - Lesson Details";
+}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-900">@Model.Title</h2>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Success</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Error</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <p class="text-gray-600 mb-2">Duration: @Model.Duration minutes</p>
+    <a href="@Url.Action("CourseContent", "Enrollment", new { courseId = Model.CourseId })" class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to Course Content</a>
+</div>
+
+<!-- Video Section -->
+@if (Model.Resources != null && Model.Resources.Any(r => r.ResourceUrl != null && (r.ResourceUrl.EndsWith(".mp4") || r.ResourceUrl.Contains("youtube.com") || r.ResourceUrl.Contains("vimeo.com"))))
+{
+    var videoResource = Model.Resources.FirstOrDefault(r => r.ResourceUrl != null && (r.ResourceUrl.EndsWith(".mp4") || r.ResourceUrl.Contains("youtube.com") || r.ResourceUrl.Contains("vimeo.com")));
+    if (videoResource != null)
+    {
+        <div class="mb-6">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Lesson Video</h3>
+            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                @if (videoResource.ResourceUrl.Contains("youtube.com") || videoResource.ResourceUrl.Contains("vimeo.com"))
+                {
+                    <iframe class="absolute top-0 left-0 w-full h-full rounded-lg" src="@videoResource.ResourceUrl" frameborder="0" allowfullscreen></iframe>
+                }
+                else
+                {
+                    <video class="absolute top-0 left-0 w-full h-full rounded-lg" controls>
+                        <source src="@videoResource.ResourceUrl" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                }
+            </div>
+        </div>
+    }
+}
+
+<!-- Lesson Content -->
+<div class="mb-6">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Lesson Content</h3>
+    @if (!string.IsNullOrEmpty(Model.Content))
+    {
+        <div class="prose prose-gray text-gray-700">
+            @Html.Raw(Model.Content)
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500">No content available for this lesson.</p>
+    }
+</div>
+
+<!-- Resources Section -->
+@if (Model.Resources != null && Model.Resources.Any())
+{
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Resources</h3>
+        <ul class="space-y-2">
+            @foreach (var resource in Model.Resources)
+            {
+                <li>
+                    @if (!string.IsNullOrEmpty(resource.ResourceUrl))
+                    {
+                        <a href="@resource.ResourceUrl" target="_blank" class="text-blue-600 hover:underline">@resource.Title</a>
+                    }
+                    else
+                    {
+                        <span class="text-gray-600">@resource.Title (No URL available)</span>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <p class="text-gray-500">No resources available for this lesson.</p>
+}
+
+<!-- Discussions Section -->
+<div class="mb-6">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Discussions</h3>
+    @if (Model.Discussions != null && Model.Discussions.Any())
+    {
+        <div class="space-y-4 overflow-y-auto max-h-60">
+            @foreach (var discussion in Model.Discussions.OrderByDescending(d => d.CreatedAt))
+            {
+                <div class="bg-gray-100 p-3 rounded-md shadow-sm">
+                    <p class="text-gray-800">@discussion.Content</p>
+                    <p class="text-sm text-gray-500 mt-1">By: @discussion.UserName on @discussion.CreatedAt.ToString("d MMM yyyy")</p>
+                    <!-- Reply Button -->
+                    <button onclick="toggleReplyForm('reply-form-@discussion.Id')" class="text-blue-500 text-sm mt-1">Reply</button>
+                    <!-- Reply Form -->
+                    <form asp-controller="LessonDiscussion" asp-action="Add" method="post" class="mt-2 hidden" id="reply-form-@discussion.Id">
+                        <input type="hidden" name="LessonId" value="@Model.Id" />
+                        <input type="hidden" name="ParentDiscussionId" value="@discussion.Id" />
+                        <div class="flex space-x-2">
+                            <textarea name="Content" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Add a reply..."></textarea>
+                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Reply</button>
+                        </div>
+                    </form>
+                    <!-- Replies -->
+                    @if (discussion.Replies != null && discussion.Replies.Any())
+                    {
+                        <div class="ml-6 mt-2 space-y-2">
+                            @foreach (var reply in discussion.Replies.OrderByDescending(r => r.CreatedAt))
+                            {
+                                <div class="bg-gray-200 p-2 rounded-md shadow-sm">
+                                    <p class="text-gray-800">@reply.Content</p>
+                                    <p class="text-sm text-gray-500 mt-1">By: @reply.UserName on @reply.CreatedAt.ToString("d MMM yyyy")</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500">No discussions yet. Be the first to start one!</p>
+    }
+    <!-- Add Discussion Form -->
+    <form asp-controller="LessonDiscussion" asp-action="Add" method="post" class="mt-4">
+        <input type="hidden" name="LessonId" value="@Model.Id" />
+        <div class="flex space-x-2">
+            <textarea name="Content" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Add a discussion..."></textarea>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Post</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    toast.style.display = 'none';
+                });
+            }, 5000);
+        });
+
+        // Toggle Reply Form
+        function toggleReplyForm(formId) {
+            const form = document.getElementById(formId);
+            form.classList.toggle('hidden');
+        }
+    </script>
+}

@@ -1,0 +1,143 @@
+﻿@model IEnumerable<Etalem.Models.DTOs.Course.CourseDto>
+
+@{
+    ViewData["Title"] = "All Courses";
+    var categories = ViewBag.Categories as List<Etalem.Models.Category>;
+    var levels = ViewBag.Levels as List<string>;
+}
+
+<div class="container mx-auto p-4 flex flex-col md:flex-row">
+    <!-- Sidebar (Filters) -->
+    <div class="md:w-1/4 p-4">
+        <h2 class="text-xl font-bold mb-4">Filters</h2>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <form id="searchForm" method="get" action="@Url.Action("Index", "Course")">
+                <div class="flex space-x-2">
+                    <input type="text" id="searchInput" name="search" class="w-full p-2 border rounded-md" placeholder="Search for courses..." value="@Context.Request.Query["search"]" />
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Search</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Categories</h3>
+            <ul>
+                @if (categories != null)
+                {
+                    foreach (var category in categories)
+                    {
+                        <li>
+                            <input type="checkbox" name="categoryId" value="@category.Id" onchange="filterCourses()" @(Context.Request.Query["categoryId"].ToString() == category.Id.ToString() ? "checked" : "") /> @category.Name
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+
+        <!-- Levels Filter -->
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Level</h3>
+            <ul>
+                @if (levels != null)
+                {
+                    foreach (var level in levels)
+                    {
+                        <li>
+                            <input type="checkbox" name="level" value="@level" onchange="filterCourses()" @(Context.Request.Query["level"].ToString() == level ? "checked" : "") /> @level
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="md:w-3/4 p-4">
+        <h1 class="text-2xl font-bold mb-4">All Courses</h1>
+        <p class="text-gray-600 mb-4">Browse our collection of courses taught by expert instructors</p>
+
+        <div id="coursesContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var course in Model)
+                    {
+                        <a href="@Url.Action("Details", "Course", new { id = course.Id })" class="block">
+                            <div class="border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white w-[311px] mx-auto transform hover:-translate-y-2 hover:shadow-lg transition-all duration-300">
+                                <!-- Thumbnail -->
+                                <div class="w-full h-48 overflow-hidden">
+                                    <img src="@(string.IsNullOrEmpty(course.ThumbnailUrl) ? "/Uploads/Courses/DefaultThumbnail.jpg" : course.ThumbnailUrl)" alt="@course.Title" class="w-full h-full object-cover" />
+                                </div>
+
+                                <!-- Course Info -->
+                                <div class="p-6">
+                                    <h3 class="text-lg font-semibold text-gray-900 truncate">@course.Title</h3>
+                                    <p class="text-gray-600 text-sm truncate">By: @course.InstructorName</p>
+
+                                    <!-- Rating and Students Info -->
+                                    <div class="flex items-center justify-center mb-2 mt-2">
+                                        <div class="flex items-center">
+                                            @{
+                                                int fullStars = (int)Math.Floor(course.AverageRating); 
+                                                int emptyStars = 5 - fullStars; 
+                                            }
+                                            <span class="text-yellow-400 text-lg">
+                                                @for (int i = 0; i < fullStars; i++)
+                                                {
+                                                    <span>★</span>
+                                                }
+                                                @for (int i = 0; i < emptyStars; i++)
+                                                {
+                                                    <span class="text-gray-300">★</span>
+                                                }
+                                            </span>
+                                            <span class="text-gray-600 ml-2">@course.AverageRating.ToString("F1") (@(course.Reviews?.Count() ?? 0) ratings)</span>
+                                        </div>
+                                        <span class="text-gray-400 mx-2">•</span>
+                                        <span class="text-gray-600">@course.EnrollmentCount students</span>
+                                    </div>
+
+                                    <p class="text-gray-600 text-sm truncate">@course.Lessons.Count lessons - @TimeSpan.FromMinutes(course.DurationInMinutes).Hours h @TimeSpan.FromMinutes(course.DurationInMinutes).Minutes m - @course.Level</p>
+
+                                    <div class="text-green-600 font-semibold mt-2">
+                                        @if (course.Price > 0)
+                                        {
+                                            @course.Price.ToString("F2")
+                                        }
+                                        else
+                                        {
+                                            <text>Free</text>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <p class="text-gray-600">No courses found.</p>
+                }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterCourses() {
+            const categoryIds = Array.from(document.querySelectorAll('input[name="categoryId"]:checked')).map(cb => cb.value);
+            const levels = Array.from(document.querySelectorAll('input[name="level"]:checked')).map(cb => cb.value);
+            const search = document.getElementById('searchInput').value;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('categoryId', categoryIds.join(',') || '');
+            url.searchParams.set('level', levels.join(',') || '');
+            url.searchParams.set('search', search);
+
+            window.location.href = url.toString();
+        }
+    </script>
+}

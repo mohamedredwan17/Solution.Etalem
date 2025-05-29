@@ -7,7 +7,9 @@ namespace Etalem.Data.Repo
     public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
     {
         private readonly ApplicationDbContext _context;
-        public CategoryRepository(ApplicationDbContext context) : base(context)
+
+
+        public CategoryRepository(ApplicationDbContext context ) : base(context)
         {
             _context = context;
         }

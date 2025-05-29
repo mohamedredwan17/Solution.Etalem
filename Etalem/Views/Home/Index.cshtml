@@ -1,8 +1,151 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Header Section -->
+<header class="bg-gray-50 py-12 text-center relative" style="background-image: url('/images/hero-background.jpg'); background-size: cover; background-position: center;">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="relative z-10">
+        <h1 class="text-4xl font-bold text-white">Learn Without Limits</h1>
+        <p class="mt-2  text-gray-200">Start, switch, or advance your career with thousands of courses from expert instructors.</p>
+        <div class="mt-2">
+            <form id="searchForm" method="get" action="@Url.Action("Index", "Course")">
+                <div class="flex space-x-2 justify-center">
+                    <input type="text" id="searchInput" name="search" class="w-120 p-2 border rounded-md" placeholder="What do you want to learn?" value="@Context.Request.Query["search"]" />
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Search</button>
+                </div>
+            </form>
+        </div>
+        <p class="mt-2 text-sm text-gray-300">Popular searches: Web Development, Python, Data Science, Marketing</p>
+    </div>
+</header>
+
+<!-- Featured Courses Section -->
+<section class="py-12 bg-white text-center">
+    <h2 class="text-2xl font-bold mb-4">Featured Courses</h2>
+    <p class="text-gray-600 mb-6">Explore our most popular and highly-rated courses</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        @foreach (var course in (ViewBag.Courses as IEnumerable<Etalem.Models.DTOs.Course.CourseDto>).Take(3))
+        {
+            <a href="@Url.Action("Details", "Course", new { id = course.Id })" class="block">
+                <div class="border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white w-[311px] mx-auto transform hover:-translate-y-2 hover:shadow-lg transition-all duration-300">
+                    <!-- Thumbnail -->
+                    <div class="w-full h-48 overflow-hidden">
+                        <img src="@(string.IsNullOrEmpty(course.ThumbnailUrl) ? "/Uploads/Courses/DefaultThumbnail.jpg" : course.ThumbnailUrl)" alt="@course.Title" class="w-full h-full object-cover" />
+                    </div>
+
+                    <!-- Course Info -->
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 truncate">@course.Title</h3>
+                        <p class="text-gray-600 text-sm truncate">By: @course.InstructorName</p>
+
+                        <!-- Rating and Students Info -->
+                        <div class="flex items-center justify-center mb-2 mt-2">
+                            <div class="flex items-center">
+                                @{
+                                    int fullStars = (int)Math.Floor(course.AverageRating);
+                                    int emptyStars = 5 - fullStars;
+                                }
+                                <span class="text-yellow-400 text-lg">
+                                    @for (int i = 0; i < fullStars; i++)
+                                    {
+                                        <span>★</span>
+                                    }
+                                    @for (int i = 0; i < emptyStars; i++)
+                                    {
+                                        <span class="text-gray-300">★</span>
+                                    }
+                                </span>
+                                <span class="text-gray-600 ml-2">@course.AverageRating.ToString("F1") (@(course.Reviews?.Count() ?? 0) ratings)</span>
+                            </div>
+                            <span class="text-gray-400 mx-2">•</span>
+                            <span class="text-gray-600">@course.EnrollmentCount students</span>
+                        </div>
+
+                        <p class="text-gray-600 text-sm truncate">@course.Lessons.Count lessons - @TimeSpan.FromMinutes(course.DurationInMinutes).Hours h @TimeSpan.FromMinutes(course.DurationInMinutes).Minutes m - @course.Level</p>
+
+                        <div class="text-green-600 font-semibold mt-2">
+                            @if (course.Price > 0)
+                            {
+                                @course.Price.ToString("F2")
+                            }
+                            else
+                            {
+                                <text>Free</text>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+    
+    <div class="mt-8">
+        <a href="@Url.Action("Index", "Course")" class="inline-block px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">
+            Explore All Courses
+        </a>
+    </div>
+</section>
+
+<section class="py-12 bg-gray-50 text-center">
+    <h2 class="text-2xl font-bold mb-4">Explore Top Categories</h2>
+    <p class="text-gray-600 mb-6">Browse courses by category and find the perfect match for your learning journey</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto mb-5">
+        @foreach (var category in (ViewBag.Categories as IEnumerable<Etalem.Models.Category>).Take(4))
+        {
+            var courseCount = (ViewBag.Courses as IEnumerable<Etalem.Models.DTOs.Course.CourseDto>)?.Count(c => c.CategoryId == category.Id) ?? 0;
+            var categoryIcons = ViewBag.CategoryIcons as Dictionary<string, string>;
+            var iconUrl = categoryIcons?.ContainsKey(category.Name) == true ? categoryIcons[category.Name] : "/images/icons/default.png";
+            // إضافة query string لكسر الكاش
+            var cacheBustedIconUrl = $"{iconUrl}?v={DateTime.Now.Ticks}";
+            <a href="@Url.Action("Index", "Course", new { categoryId = category.Id })" class="block">
+                <div class="border rounded-lg p-4 shadow text-center hover:shadow-lg transition-all duration-300">
+                    <div class="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded-full flex items-center justify-center">
+                        <img src="@cacheBustedIconUrl" alt="@category.Name Icon" class="w-full h-full object-cover rounded-full" onerror="this.src='/images/icons/default.png'" />
+                    </div>
+                    <h3 class="text-lg font-semibold">@category.Name</h3>
+                    <p class="text-sm text-gray-600">@courseCount courses</p>
+                </div>
+            </a>
+        }
+    </div>
+    <a href="@Url.Action("Index", "Category")" class="mt-4 text-blue-600 hover:underline">View all categories ></a>
+</section>
+<!-- Why Choose Etaalem Section -->
+<section class="py-12 bg-white text-center">
+    <h2 class="text-2xl font-bold mb-6">Why Choose Etaalem?</h2>
+    <p class="text-gray-600 mb-6">We provide the tools and resources you need to expand your knowledge and advance your career.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
+        <div class="border rounded-lg p-4 shadow">
+            
+            <h3 class="text-lg font-semibold">Comprehensive Courses</h3>
+            <p class="text-sm text-gray-600">Access a wide range of courses covering various subjects and skill levels.</p>
+        </div>
+        <div class="border rounded-lg p-4 shadow">
+            
+            
+            <h3 class="text-lg font-semibold">Expert Instructors</h3>
+            <p class="text-sm text-gray-600">Learn from industry professionals and experienced instructors from around the world.</p>
+        </div>
+        <div class="border rounded-lg p-4 shadow">
+            
+            <h3 class="text-lg font-semibold">Flexible Learning</h3>
+            <p class="text-sm text-gray-600">Study at your own pace, anywhere and anytime that suits your schedule.</p>
+        </div>
+        <div class="border rounded-lg p-4 shadow">
+            
+            <h3 class="text-lg font-semibold">Certification</h3>
+            <p class="text-sm text-gray-600">Earn certificates upon completion to showcase your newly acquired skills.</p>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Call to Action Section -->
+<section class="py-12 bg-blue-600 text-white text-center">
+    <h2 class="text-2xl font-bold mb-4">Ready to Start Your Learning Journey?</h2>
+    <p class="mb-6">Join thousands of students already learning on CourseHub. Discover courses and start learning today.</p>
+    <a asp-controller="Course" asp-action="Index" class="bg-white text-blue-600 px-4 py-2 rounded mr-2 hover:bg-gray-200">Explore Courses</a>
+    <a href="#" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-200">Become an Instructor</a>
+</section>

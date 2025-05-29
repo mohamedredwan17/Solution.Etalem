@@ -18,7 +18,7 @@
             <div class="container mx-auto flex items-center justify-between">
                 <!-- Left Section: Logo and Main Links -->
                 <div class="flex items-center space-x-4">
-                    <a class="text-xl font-bold text-gray-900 md:text-2xl" asp-area="" asp-page="/Index">
+                    <a class="text-xl font-bold text-gray-900 md:text-2xl" asp-controller="Home" asp-action="Index">
                         <svg class="h-8 w-8 text-blue-600 inline pb-1 " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
@@ -29,11 +29,11 @@
                     <div class="hidden md:flex md:items-center md:space-x-4">
                         <ul class="flex space-x-4 items-center">
                             <li>
-                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-area="" asp-page="/Index">Home</a>
+                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-controller="Home" asp-action="Index">Home</a>
 
                             </li>
                             <li>
-                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-area="" asp-page="/Courses">Courses</a>
+                                <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base" asp-controller="Course" asp-action="Index">Courses</a>
 
                             </li>
 
@@ -51,11 +51,11 @@
                                     <div class="py-2">
                                         @foreach (var category in _context.Categories.ToList())
                                         {
-                                            <a href="/Courses?categoryId=@category.Id" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <a href="@Url.Action("Index", "Course", new { categoryId = category.Id })" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 @category.Name
                                             </a>
                                         }
-                                        <a href="/Categories" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
+                                        <a href="@Url.Action("Index", "Category")" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
                                             View All Categories
                                         </a>
                                     </div>
@@ -94,10 +94,10 @@
             <div id="nav-menu" class="hidden md:hidden absolute top-16 left-0 w-full bg-white shadow-md p-4 z-50">
                 <ul class="flex flex-col space-y-2  ">
                     <li>
-                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-area="" asp-page="/Index">Home</a>
+                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li>
-                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-area="" asp-page="/Courses">Courses</a>
+                        <a class="text-gray-700 hover:text-blue-600 text-sm md:text-base block py-2" asp-controller="Course" asp-action="Index">Courses</a>
                     </li>
                     <li class="relative" id="mobileCategoryDropdown">
                         <button id="mobileDropdownButton" class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:text-blue-600 focus:outline-none">
@@ -115,7 +115,7 @@
                                         @category.Name
                                     </a>
                                 }
-                                <a href="/Categories" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
+                                <a href="@Url.Action("Index", "Category")" class="block px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border-t border-gray-100">
                                     View All Categories
                                 </a>
                             </div>

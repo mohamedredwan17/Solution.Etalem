@@ -1,0 +1,109 @@
+﻿@page "{lessonId:int}/{courseId:int}"
+@model Etalem.Areas.Identity.Pages.Instructor.Lessons.ResourcesModel
+
+@{
+    ViewData["Title"] = "Manage Resources for Lesson";
+}
+
+<div class="m-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">Manage Resources for Lesson: @Model.Lesson.Title</h1>
+
+    <!-- Errors -->
+    @if (!ModelState.IsValid)
+    {
+        <div class="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-200 p-4 rounded-md mb-6" role="alert">
+            @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p class="text-sm">@error.ErrorMessage</p>
+            }
+        </div>
+    }
+
+    <!-- Existing Resources -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Existing Resources</label>
+        @if (Model.Lesson.Resources.Any())
+        {
+            <div class="space-y-4">
+                @foreach (var resource in Model.Lesson.Resources)
+                {
+                    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
+                        <span class="text-gray-800 dark:text-gray-200">@resource.Title (@resource.ResourceType)</span>
+                        <div class="flex space-x-4">
+                            <!-- View -->
+                            <a href="@resource.ResourceUrl" target="_blank" class="inline-flex items-center space-x-1 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                <span>View</span>
+                            </a>
+                            <!-- Remove -->
+                            <form method="post" asp-page-handler="DeleteResource" asp-route-resourceId="@resource.Id" asp-route-lessonId="@Model.Lesson.Id" asp-route-courseId="@Model.CourseId" class="inline">
+                                <button type="submit" onclick="return confirm('Are you sure you want to remove this resource?')" class="inline-flex items-center space-x-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <span>Remove</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-600 dark:text-gray-400">No resources available.</p>
+        }
+        
+
+        <!-- Add New Resource Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+            <form method="post" asp-page-handler="AddResource" asp-route-lessonId="@Model.Lesson.Id" asp-route-courseId="@Model.CourseId" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Add New Resource</label>
+                    <div class="grid grid-cols-1 gap-4 mt-4">
+                        <div>
+                            <label asp-for="NewResource.Title" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+                            <input asp-for="NewResource.Title" class="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500" />
+                            <span asp-validation-for="NewResource.Title" class="text-red-600 text-sm"></span>
+                        </div>
+                        <div>
+                            <label asp-for="NewResource.ResourceType" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+                            <select asp-for="NewResource.ResourceType" class="mt-1 block w-full rounded-md border-2 border-gray-400 shadow-sm dark:bg-gray-800 dark:border-gray-500 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Select Type</option>
+                                <option value="media">Media</option>
+                                <option value="Docs">Docs</option>
+                            </select>
+                            <span asp-validation-for="NewResource.ResourceType" class="text-red-600 text-sm"></span>
+                        </div>
+                        <div>
+                            <label asp-for="NewResource.ResourceFile" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+                            <input asp-for="NewResource.ResourceFile" type="file" class="mt-1 block w-full text-gray-700 dark:text-gray-100 file:rounded-md file:border-2 file:border-gray-400 file:bg-gray-50 file:text-gray-700 dark:file:bg-gray-700 dark:file:border-gray-500 dark:file:text-gray-100" />
+                            <span asp-validation-for="NewResource.ResourceFile" class="text-red-600 text-sm"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <button type="submit" class="inline-flex items-center space-x-1 px-4 py-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Add Resource</span>
+                    </button>
+                    <a asp-page="Index" asp-route-courseId="@Model.CourseId" class="inline-flex items-center space-x-1 px-4 py-2 bg-gray-300 text-gray-800 rounded-full hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-colors duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        <span>Cancel</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }

@@ -19,19 +19,19 @@ namespace Etalem.Services
         {
             if (file == null || file.Length == 0)
             {
-                return null; // أو يمكن ترجع مسار صورة افتراضية
+                return null; 
             }
 
             // التحقق من نوع الملف
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf", ".mp4" };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(extension))
             {
                 throw new Exception("Only JPG and PNG files are allowed.");
             }
 
-            // التحقق من حجم الملف (مثلاً أقصى 5 ميجا)
-            const long maxFileSize = 5 * 1024 * 1024; // 5MB
+            
+            const long maxFileSize = 50 * 1024 * 1024; // 50MB
             if (file.Length > maxFileSize)
             {
                 throw new Exception("File size cannot exceed 5MB.");
@@ -44,7 +44,7 @@ namespace Etalem.Services
                 Directory.CreateDirectory(uploadsFolder);
             }
 
-            // إنشاء اسم ملف فريد
+            
             var fileName = $"{Guid.NewGuid()}{extension}";
             var filePath = Path.Combine(uploadsFolder, fileName);
             var relativePath = $"/Uploads/{subfolder}/{fileName}";

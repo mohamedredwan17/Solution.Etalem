@@ -1,62 +1,92 @@
-﻿using Etalem.Models;
+﻿using Etalem.Data;
+using Etalem.Models;
+using Etalem.Services;
 using Etalem.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
-[Route("api/[controller]")]
-[ApiController]
-public class CategoryController : ControllerBase
+namespace Etalem.Controllers
 {
-    private readonly ICategoryService _categoryService;
-
-    public CategoryController(ICategoryService categoryService)
+    public class CategoryController : Controller
     {
-        _categoryService = categoryService;
-    }
+        private readonly ICategoryService _categoryService;
+        private readonly CourseService _courseService;
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<HomeController> _logger;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var categories = await _categoryService.GetAllCategoriesAsync();
-        return Ok(categories);
-    }
+        public CategoryController(ICategoryService categoryService, CourseService courseService, ApplicationDbContext context, ILogger<HomeController> logger)
+        {
+            _categoryService = categoryService;
+            _courseService = courseService;
+            _context = context;
+            _logger = logger;
+        }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var category = await _categoryService.GetCategoryByIdAsync(id);
-        if (category == null) return NotFound();
-        return Ok(category);
-    }
+        public async Task<IActionResult> Index()
+        {
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            var courses = await _courseService.GetAllAsync();
 
-    [HttpPost]
-    [Authorize(Roles ="admin")]
-    public async Task<IActionResult> Create([FromBody] Category category)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        var created = await _categoryService.CreateCategoryAsync(category);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
-    }
+            
+            _logger.LogInformation("Retrieved {CategoryCount} categories", categories.Count());
+            foreach (var category in categories)
+            {
+                _logger.LogInformation("Category ID: {CategoryId}, Name: {CategoryName}", category.Id, category.Name);
+            }
 
-    [HttpPut("{id}")]
-    [Authorize(Roles = "admin")]
-    public async Task<IActionResult> Update(int id, [FromBody] Category category)
-    {
-        if (id != category.Id) return BadRequest("Mismatched ID");
+           
+            _logger.LogInformation("Retrieved {CourseCount} courses", courses.Count());
+            foreach (var course in courses)
+            {
+                _logger.LogInformation("Course ID: {CourseId}, CategoryId: {CategoryId}, Title: {Title}", course.Id, course.CategoryId, course.Title);
+            }
 
-        var updated = await _categoryService.UpdateCategoryAsync(category);
-        if (!updated) return NotFound();
+            // حساب عدد الكورسات لكل كاتيجوري
+            var categoryCourseCounts = await _context.Courses
+                .GroupBy(c => c.CategoryId)
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
 
-        return NoContent();
-    }
+            
+            foreach (var entry in categoryCourseCounts)
+            {
+                _logger.LogInformation("Category ID: {CategoryId}, Course Count: {CourseCount}", entry.Key, entry.Value);
+            }
 
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "admin")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var deleted = await _categoryService.DeleteCategoryAsync(id);
-        if (!deleted) return NotFound();
+            var categoryIcons = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Web Development", "/images/icons/web-development.png" },
+                { "Data Science", "/images/icons/data-science.png" },
+                { "Marketing", "/images/icons/marketing.png" },
+                { "IT & Software", "/images/icons/it-&-software.png" },
+                { "Business", "/images/icons/business.png" },
+                { "Photography", "/images/icons/photography.png" },
+                { "UI UX Design", "/images/icons/ui-ux-design.png" },
+                { "Mobile Application", "/images/icons/mobile-application.png" },
+            };
 
-        return NoContent();
+            
+            var courseDtos = courses.ToList();
+            var instructorIds = courseDtos.Select(c => c.InstructorId).Distinct().ToList();
+            var instructorEmails = await _context.Users
+                .Where(u => instructorIds.Contains(u.Id))
+                .ToDictionaryAsync(u => u.Id, u => u.Email);
+
+            foreach (var course in courseDtos)
+            {
+                if (instructorEmails.ContainsKey(course.InstructorId))
+                {
+                    course.InstructorId = instructorEmails[course.InstructorId];
+                }
+            }
+
+            ViewBag.Categories = categories;
+            ViewBag.Courses = courseDtos;
+            ViewBag.CategoryIcons = categoryIcons;
+            ViewBag.CategoryCourseCounts = categoryCourseCounts;
+            return View();
+        }
     }
 }

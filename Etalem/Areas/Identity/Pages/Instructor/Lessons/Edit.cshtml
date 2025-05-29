@@ -1,0 +1,51 @@
+﻿@page "{id:int}/{courseId:int}"
+@model Etalem.Areas.Identity.Pages.Instructor.Lessons.EditModel
+
+@{
+    ViewData["Title"] = "Edit Lesson";
+}
+
+<h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">Edit Lesson</h1>
+<div class="text-red-600 mb-4">
+    @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+    {
+        <p>@error.ErrorMessage</p>
+    }
+</div>
+
+<form method="post" class="space-y-6 max-w-2xl mx-auto">
+    <input asp-for="Lesson.Id" type="hidden" />
+    <input asp-for="Lesson.CourseId" type="hidden" />
+    <div>
+        <label asp-for="Lesson.Title" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Lesson.Title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Lesson.Title" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Lesson.Content" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <textarea asp-for="Lesson.Content" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200"></textarea>
+        <span asp-validation-for="Lesson.Content" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Lesson.Duration" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Lesson.Duration" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Lesson.Duration" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div>
+        <label asp-for="Lesson.Order" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
+        <input asp-for="Lesson.Order" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
+        <span asp-validation-for="Lesson.Order" class="text-red-600 text-sm"></span>
+    </div>
+
+    <div class="flex justify-end space-x-4">
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">Update Lesson</button>
+        <a asp-page="Index" asp-route-courseId="@Model.Lesson.CourseId" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

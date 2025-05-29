@@ -17,6 +17,8 @@
 <form method="post" enctype="multipart/form-data" class="space-y-6 max-w-2xl mx-auto">
     <input asp-for="Course.Id" type="hidden" />
     <input asp-for="Course.ThumbnailUrl" type="hidden" />
+    <input asp-for="Course.InstructorId" type="hidden" />
+
 
     <div>
         <label asp-for="Course.Title" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
@@ -72,11 +74,6 @@
         <span asp-validation-for="Course.Requirements" class="text-red-600 text-sm"></span>
     </div>
 
-    <div>
-        <label asp-for="Course.DurationInMinutes" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>
-        <input asp-for="Course.DurationInMinutes" type="number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200" />
-        <span asp-validation-for="Course.DurationInMinutes" class="text-red-600 text-sm"></span>
-    </div>
 
     <div>
         <label asp-for="Course.CategoryId" class="block text-sm font-medium text-gray-700 dark:text-gray-300"></label>

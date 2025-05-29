@@ -9,8 +9,12 @@ using Etalem.Services;
 using Etalem.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.json");
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -18,10 +22,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+
+
 // إعداد Identity مع الأدوار
 builder.Services.AddIdentity<IdentityUser ,IdentityRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // تفعيل تأكيد البريد
+    options.SignIn.RequireConfirmedAccount = false; 
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultUI() // إضافة واجهة Identity الافتراضية
@@ -40,12 +46,23 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ILessonRepository, LessonRepository>();
+builder.Services.AddScoped<ILessonResourceRepository, LessonResourceRepository>();
+builder.Services.AddScoped<IDiscussionRepository, DiscussionRepository>();
 
 //builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<CourseService>();
-builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<LessonService>();
+builder.Services.AddScoped<LessonResourceService>();
+builder.Services.AddScoped<EnrollmentService>();
+builder.Services.AddScoped<QuizAttemptService>();
+builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<QuizService>();
+builder.Services.AddScoped<Etalem.Services.ReviewService>();
+builder.Services.AddScoped<CertificateGenerationService>();
+builder.Services.AddScoped<IFileService, Etalem.Services.FileService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -79,6 +96,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // لخدمة الملفات الثابتة
+
 
 app.UseRouting();
 

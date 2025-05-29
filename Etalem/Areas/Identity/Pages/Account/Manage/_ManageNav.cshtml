@@ -12,13 +12,13 @@
     @if (User.IsInRole("Instructor"))
     {
         <li>
-            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-page="/Instructor/Dashboard">Instructor Dashboard</a>
+            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-page="/Instructor/Courses/Index">Instructor Dashboard</a>
         </li>
     }
     @if (User.IsInRole("Student"))
     {
         <li>
-            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-area="" asp-page="/StudentPage">Student Dashboard</a>
+            <a class="block px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded" asp-controller="Enrollment" asp-action="Index">Student Dashboard</a>
         </li>
     }
     <li>

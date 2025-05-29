@@ -1,0 +1,152 @@
+﻿@model Etalem.Models.DTOs.Course.QuizDto
+
+@{
+    ViewData["Title"] = Model.Title + " - Quiz Details";
+}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-900">@Model.Title</h2>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Success</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Error</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+</div>
+
+<div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <p class="text-gray-600 mb-2">@Model.Description</p>
+    <p class="text-gray-600 mb-2">Time Limit: @Model.TimeLimit minutes</p>
+    <p class="text-gray-600 mb-2">Passing Score: @Model.PassingScore%</p>
+    <p class="text-gray-600 mb-2">Max Attempts: @Model.MaxAttempts</p>
+    <p class="text-gray-600 mb-2">Attempts Made: @ViewBag.AttemptsCount</p>
+    <a href="@Url.Action("CourseContent", "Enrollment", new { courseId = Model.CourseId })" class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to Course Content</a>
+</div>
+
+<!-- عرض النتائج إذا كان فيه محاولة -->
+@if (ViewBag.LastAttempt != null)
+{
+    var lastAttempt = ViewBag.LastAttempt as Etalem.Models.DTOs.Course.QuizAttemptDto;
+    <h3 class="text-2xl font-semibold text-gray-900 mb-4">Your Last Attempt (Attempt #@lastAttempt.AttemptNumber)</h3>
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <p class="text-gray-600 mb-2">Score: @lastAttempt.Score%</p>
+        <p class="text-gray-600 mb-2">Passed: @(lastAttempt.IsPassed ? "Yes" : "No")</p>
+        <h4 class="text-lg font-medium text-gray-800 mb-4">Answers:</h4>
+        <div class="space-y-4">
+            @foreach (var answer in lastAttempt.Answers)
+            {
+                var question = Model.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
+                if (question == null) continue;
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <p class="text-gray-800 font-medium">@question.Text</p>
+                    <p class="text-gray-600 mt-1">Your Answer: <span class="@(answer.IsCorrect ? "text-green-600" : "text-red-600")">@answer.SelectedAnswer</span></p>
+                    @if (!answer.IsCorrect)
+                    {
+                        <p class="text-gray-600 mt-1">Correct Answer: <span class="text-green-600">@answer.CorrectAnswer</span></p>
+                    }
+                    <p class="text-gray-600 mt-1">Points: @answer.PointsEarned</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- زرار Retake Quiz إذا لسه فيه محاولات -->
+    @if (ViewBag.AttemptsCount < Model.MaxAttempts)
+    {
+        <form asp-action="RetakeQuiz" asp-route-quizId="@Model.Id" method="post" class="mb-6">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Retake Quiz</button>
+        </form>
+    }
+}
+
+<h3 class="text-2xl font-semibold text-gray-900 mb-4">Take the Quiz</h3>
+
+@if (Model.Questions != null && Model.Questions.Any())
+{
+    <form asp-action="SubmitQuiz" method="post">
+        <input type="hidden" name="quizId" value="@Model.Id" />
+
+        <div class="space-y-6">
+            @foreach (var question in Model.Questions.OrderBy(q => q.Order))
+            {
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h4 class="text-lg font-medium text-gray-800 mb-2">@question.Text</h4>
+
+                    @{
+                        List<string> options = new List<string>();
+                        try
+                        {
+                            if (string.IsNullOrEmpty(question.Options))
+                            {
+                                options = new List<string>();
+                            }
+                            else
+                            {
+                                string cleanedOptions = question.Options.Trim();
+                                if (cleanedOptions.StartsWith("\"") && cleanedOptions.EndsWith("\""))
+                                {
+                                    cleanedOptions = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(question.Options);
+                                }
+                                options = Newtonsoft.Json.JsonConvert.DeserializeObject<List<string>>(cleanedOptions);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            <p class="text-red-500">Error loading options: @ex.Message</p>
+                            <p>Raw Options: @question.Options</p>
+                            options = new List<string>();
+                        }
+                    }
+
+                    <div class="space-y-2">
+                        @foreach (var option in options)
+                        {
+                            <div class="flex items-center">
+                                <input type="radio" name="answers[@question.Id]" value="@option" class="mr-2" required />
+                                <label class="text-gray-700">@option</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-6">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Quiz</button>
+        </div>
+    </form>
+}
+else
+{
+    <div class="text-center text-gray-500 py-6 bg-gray-50 rounded-lg">
+        <p>No questions available for this quiz.</p>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    toast.style.display = 'none';
+                });
+            }, 5000);
+        });
+    </script>
+}

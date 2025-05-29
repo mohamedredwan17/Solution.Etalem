@@ -5,49 +5,310 @@
     ViewData["Title"] = "My Courses";
 }
 
-<h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">My Courses</h1>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-200">My Courses</h1>
 
-<div class="mb-4">
-    <a asp-page="CreateCourse" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">Create New Course</a>
-</div>
-
-@if (Model.Courses.Any())
-{
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg">
-            <thead>
-                <tr class="bg-gray-100 dark:bg-gray-700">
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Thumbnail</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Title</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Price</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Level</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Published</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var course in Model.Courses)
-                {
-                    <tr class="border-b dark:border-gray-600">
-                        <td class="px-4 py-2">
-                            <img src="@course.ThumbnailUrl" alt="@course.Title" class="w-16 h-16 object-cover rounded" />
-                        </td>
-                        <td class="px-4 py-2 text-gray-800 dark:text-gray-200">@course.Title</td>
-                        <td class="px-4 py-2 text-gray-800 dark:text-gray-200">@course.Price.ToString("C")</td>
-                        <td class="px-4 py-2 text-gray-800 dark:text-gray-200">@course.Level</td>
-                        <td class="px-4 py-2 text-gray-800 dark:text-gray-200">@(course.IsPublished ? "Yes" : "No")</td>
-                        <td class="px-4 py-2">
-                            <a asp-page="EditCourse" asp-route-id="@course.Id" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-600">Edit</a>
-                            <span class="mx-2">|</span>
-                            <a asp-page="DeleteCourse" asp-route-id="@course.Id" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-600">Delete</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+    
+    <div class="mb-6 flex justify-end">
+        <a asp-page="CreateCourse" class="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600">Add New Course</a>
     </div>
-}
-else
-{
-    <p class="text-gray-600 dark:text-gray-400">No courses found. Start by creating a new course!</p>
-};
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!--  الإحصائيات -->
+    <div class="mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332-.477-4.5-1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Courses</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">@Model.TotalCourses</p>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Students</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">@Model.TotalStudents</p>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenues</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">$@Model.TotalRevenues.ToString("F2")</p>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.951c.3.921-.755 1.688-1.539 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.539-1.118l1.287-3.951a1 1 0 00-.364-1.118l-3.357-2.44c-.784-.57-.381-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.95z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Average Rating</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">@Model.TotalAverageRating.ToString("F1")</p>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332-.477-4.5-1.253"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Lessons</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">@Model.TotalLessons</p>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center">
+                <div class="mr-4">
+                    <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h12a2 2 0 012 2v2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reviews</h3>
+                    <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">@Model.TotalReviews</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button id="courses-tab" class="tab-button border-indigo-500 text-indigo-600 border-b-2 font-medium py-4 px-1 text-sm active" onclick="showTab('courses')">Courses</button>
+            <button id="analytics-tab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 font-medium py-4 px-1 text-sm" onclick="showTab('analytics')">Analytics</button>
+            <button id="reviews-tab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 font-medium py-4 px-1 text-sm" onclick="showTab('reviews')">Reviews</button>
+            <button id="students-tab" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 font-medium py-4 px-1 text-sm" onclick="showTab('students')">Students</button>
+        </nav>
+    </div>
+
+    
+    <div>
+        <div id="courses-content" class="tab-content">
+            @if (Model.Courses.Any())
+            {
+                <div class="space-y-6">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md flex flex-col sm:flex-row w-full">
+                           
+                            <div class="w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
+                                <img src="@course.ThumbnailUrl" alt="@course.Title" class="object-cover w-full h-full sm:h-48 rounded-l-lg sm:rounded-l-lg rounded-t-lg sm:rounded-t-none" />
+                            </div>
+                           
+                            <div class="p-6 flex-1">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">@course.Title</h2>
+                                    <div class="flex space-x-2">
+                                        <a asp-page="../Lessons/Index" asp-area="Identity" asp-route-courseId="@course.Id" class="p-2 bg-green-600 text-white rounded-full hover:bg-green-700" title="Manage Lessons">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332-.477-4.5-1.253"></path>
+                                            </svg>
+                                            
+                                        </a>
+                                        <a asp-page="../Quizzes/Index" asp-area="Identity" asp-route-courseId="@course.Id" class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700" title="Manage Quizzes">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
+                                            </svg>
+                                            
+                                        </a>
+                                        <a asp-page="EditCourse" asp-route-id="@course.Id" class="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700" title="Edit">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </a>
+                                        <a asp-page="DeleteCourse" asp-route-id="@course.Id" class="p-2 bg-red-600 text-white rounded-full hover:bg-red-700" title="Delete">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">@course.ShortDescription</p>
+                                <div class="flex items-center flex-wrap space-x-6 mb-4">
+                                    <div class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Students:</span> @course.EnrollmentCount
+                                    </div>
+                                    <div class="text-gray-600 dark:text-gray-400 flex items-center space-x-1">
+                                        <span class="font-medium">Rating:</span>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= (int)course.AverageRating)
+                                            {
+                                                <svg class="w-5 h-5 text-yellow-400 inline" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.951c.3.921-.755 1.688-1.539 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.539-1.118l1.287-3.951a1 1 0 00-.364-1.118l-3.357-2.44c-.784-.57-.381-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.95z" />
+                                                </svg>
+                                            }
+                                            else
+                                            {
+                                                <svg class="w-5 h-5 text-gray-300 inline" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.287 3.951c.3.921-.755 1.688-1.539 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.539-1.118l1.287-3.951a1 1 0 00-.364-1.118l-3.357-2.44c-.784-.57-.381-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.95z" />
+                                                </svg>
+                                            }
+                                        }
+                                        <span class="ml-1">@course.AverageRating.ToString("F1") (@(course.Reviews?.Count ?? 0))</span>
+                                    </div>
+                                    <div class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Price:</span> $@course.Price.ToString("F2")
+                                    </div>
+                                    <div class="text-gray-600 dark:text-gray-400">
+                                        <span class="font-medium">Revenues:</span> $@((course.Price * course.EnrollmentCount).ToString("F2"))
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <div class="text-gray-500 dark:text-gray-400 text-sm">
+                                        <p><span class="font-medium">Lectures:</span> @(course.Lessons?.Count ?? 0)</p>
+                                        <p><span class="font-medium">Duration:</span> @(course.DurationInMinutes / 60)h @(course.DurationInMinutes % 60)m</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-gray-600 dark:text-gray-400">No courses found. Start by adding a new course!</p>
+            }
+        </div>
+
+        <div id="analytics-content" class="tab-content hidden">
+            <!-- Completion Rates -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Completion Rates</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Percentage of students who complete each course</p>
+                <div class="space-y-4">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>@course.Title</span>
+                                <span>@(course.CompletionRate.ToString("F0"))% completion</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: @(course.CompletionRate > 0 ? course.CompletionRate : 0)%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Course Performance -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Course Performance</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enrollments by course</p>
+                <div class="space-y-4">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <!-- Calculate percentage based on max enrollment -->
+                        var maxEnrollment = Model.Courses.Max(c => c.EnrollmentCount);
+                        var percentage = maxEnrollment > 0 ? (course.EnrollmentCount * 100 / maxEnrollment) : 0;
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span>@course.Title</span>
+                                <span>@course.EnrollmentCount students</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: @percentage%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div id="reviews-content" class="tab-content hidden">
+            <!-- Course Ratings and Recent Reviews -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Course Ratings</h2>
+                <div class="mb-6">
+                    <p class="text-gray-700 dark:text-gray-300">Overall rating: @(Model.TotalAverageRating > 0 ? Model.TotalAverageRating.ToString("F1") : "N/A") out of 5</p>
+                    <div class="flex items-center space-x-2 mt-2">
+                        @for (int i = 5; i >= 1; i--)
+                        {
+                            <span class="text-yellow-400">★</span>
+                            <span class="text-gray-500 dark:text-gray-400">@i</span>
+                            <div class="w-24 bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-yellow-400 h-2.5 rounded-full" style="width: @(Model.RatingDistribution.ContainsKey(i) ? Model.RatingDistribution[i] : 0)%"></div>
+                            </div>
+                            <span class="text-gray-500 dark:text-gray-400">@(Model.RatingDistribution.ContainsKey(i) ? Model.RatingDistribution[i].ToString("F0") : "0")%</span>
+                        }
+                    </div>
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-6 mb-4">Recent Reviews</h2>
+                @if (!Model.RecentReviews.Any())
+                {
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No recent reviews available.</p>
+                }
+                else
+                {
+                    <div class="space-y-4">
+                        @foreach (var review in Model.RecentReviews)
+                        {
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">@review.UserName</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">@review.CourseTitle</p>
+                                    </div>
+                                    @* <p class="text-xs text-gray-500 dark:text-gray-400">@(review.CreatedAt.HasValue ? review.CreatedAt.Value.ToString("MMM dd, yyyy") : "N/A")</p> *@
+                                </div>
+                                <div class="flex items-center mt-1">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        <span class="text-yellow-400">@(i < review.Rating ? "★" : "☆")</span>
+                                    }
+                                </div>
+                                <p class="mt-2 text-gray-700 dark:text-gray-300">@review.Comment</p>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div id="students-content" class="tab-content hidden">
+            
+            <p class="text-gray-600 dark:text-gray-400">Students content will be added later.</p>
+        </div>
+    </div>
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+
+        <script>
+            function showTab(tabName) {
+                document.querySelectorAll('.tab-content').forEach(content => { content.classList.add('hidden'); });
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('border-indigo-500', 'text-indigo-600');
+                    button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                });
+                document.getElementById(tabName + '-content').classList.remove('hidden');
+                document.getElementById(tabName + '-tab').classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                document.getElementById(tabName + '-tab').classList.add('border-indigo-500', 'text-indigo-600');
+            }
+            document.addEventListener('DOMContentLoaded', () => { showTab('courses'); });
+        </script>
+    }
+    

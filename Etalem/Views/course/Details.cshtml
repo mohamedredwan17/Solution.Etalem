@@ -1,0 +1,334 @@
+﻿@model Etalem.Models.DTOs.Course.CourseDto
+
+@{
+    ViewData["Title"] = Model.Title + " - Course Details";
+}
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Success</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-500 text-white p-4 rounded-md shadow-lg mb-2" role="alert">
+            <div class="flex justify-between items-center">
+                <span class="font-semibold">Error</span>
+                <button type="button" class="text-white hover:text-gray-200" onclick="this.parentElement.parentElement.style.display='none'">×</button>
+            </div>
+            <p class="mt-2">@TempData["ErrorMessage"]</p>
+        </div>
+    }
+</div>
+
+<!-- Hero Section with Dark Background -->
+<section class="py-12 bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Content -->
+            <div class="lg:col-span-2">
+                <h1 class="text-4xl font-bold text-white mb-4">@Model.Title</h1>
+                <p class="text-lg text-gray-300 mb-6">@Model.Description</p>
+
+                <!-- Short Description -->
+                @if (!string.IsNullOrEmpty(Model.ShortDescription))
+                {
+                    <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                        <p class="text-gray-300">@Model.ShortDescription</p>
+                    </div>
+                }
+
+                <!-- Rating and Students Info -->
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center">
+                        @{
+                            int fullStars = (int)Math.Floor(Model.AverageRating); // عدد النجوم الكاملة
+                            int emptyStars = 5 - fullStars; // عدد النجوم الفارغة
+                        }
+                        <span class="text-yellow-400 text-xl">
+                            @for (int i = 0; i < fullStars; i++)
+                            {
+                                <span>★</span>
+                            }
+                            @for (int i = 0; i < emptyStars; i++)
+                            {
+                                <span class="text-gray-300">★</span>
+                            }
+                        </span>
+                        <span class="text-gray-300 ml-2">@Model.AverageRating.ToString("F1") (@(Model.Reviews != null ? Model.Reviews.Count() : 0) ratings)</span>
+                    </div>
+                    <span class="text-gray-500 mx-2">•</span>
+                    <span class="text-gray-300">@Model.EnrollmentCount students</span>
+                </div>
+
+                <!-- Reviews Section (Slider) -->
+                @if (Model.Reviews != null && Model.Reviews.Any())
+                {
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Student Reviews</h3>
+                        <div class="relative">
+                            <!-- Reviews Slider -->
+                            <div id="reviewsSlider" class="overflow-hidden">
+                                <div class="flex transition-transform duration-500 ease-in-out" id="reviewsContainer">
+                                    @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+                                    {
+                                        <div class="bg-gray-800 px-12 p-4 rounded-lg shadow-md flex-shrink-0 w-full ">
+                                            <div class="flex items-center mb-2">
+                                                <span class="text-yellow-400 text-lg">
+                                                    @for (int i = 0; i < review.Rating; i++)
+                                                    {
+                                                        <span>★</span>
+                                                    }
+                                                    @for (int i = review.Rating; i < 5; i++)
+                                                    {
+                                                        <span class="text-gray-300">★</span>
+                                                    }
+                                                </span>
+                                            </div>
+                                            <p class="text-gray-400 mb-2">@review.Comment</p>
+                                            <p class="text-sm text-gray-300 font-medium">By: @review.UserName</p>
+                                            <p class="text-sm text-gray-500">Reviewed on @review.CreatedAt.ToString("d MMM yyyy")</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <!-- Arrows -->
+                            @if (Model.Reviews.Count() > 1)
+                            {
+                                <button id="prevReview" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                <button id="nextReview" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full hover:bg-gray-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-6 bg-gray-800 p-4 rounded-lg text-center text-gray-400">
+                        No reviews yet. Be the first to review this course!
+                    </div>
+                }
+
+                <!-- Learning Objectives -->
+                @if (!string.IsNullOrEmpty(Model.LearningObjectives))
+                {
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-white mb-2">What you'll learn</h3>
+                        <ul class="text-gray-300 list-disc list-inside space-y-1">
+                            @foreach (var objective in Model.LearningObjectives.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <li>@objective</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- Requirements -->
+                @if (!string.IsNullOrEmpty(Model.Requirements))
+                {
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold text-white mb-2">Requirements</h3>
+                        <ul class="text-gray-300 list-disc list-inside space-y-1">
+                            @foreach (var requirement in Model.Requirements.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries))
+                            {
+                                <li>@requirement</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- Created by and Last updated -->
+                <div class="text-gray-300 mb-6">
+                    <p>Created by <span class="font-medium text-white">@Model.Instructor?.UserName</span></p>
+                    <p>Level: <span class="font-medium text-white">@Model.Level</span></p>
+                    @if (Model.Category != null)
+                    {
+                        <p>Category: <span class="font-medium text-white">@Model.Category.Name</span></p>
+                    }
+                </div>
+            </div>
+
+            <!-- Sidebar - Pricing and Enrollment -->
+            <div class="lg:col-span-1">
+                <div class="border border-gray-700 rounded-lg overflow-hidden shadow-md bg-gray-800">
+                    <!-- Course Image in Sidebar -->
+                    @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+                    {
+                        <div class="w-full h-48 overflow-hidden">
+                            <img src="@Model.ThumbnailUrl"
+                                 alt="@Model.Title"
+                                 class="w-full h-full object-cover">
+                        </div>
+                    }
+
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <span class="text-3xl font-bold text-white">@(Model.Price == 0 ? "Free" : $"${Model.Price}")</span>
+                        </div>
+
+                        <form asp-controller="Enrollment" asp-action="@(Model.Price == 0 ? "Enroll" : "CreateCheckoutSession")" method="post">
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 mb-4 font-medium">
+                                @(Model.Price == 0 ? "Start Learning" : "Enroll")
+                            </button>
+                        </form>
+
+                        @if (Model.Price > 0)
+                        {
+                            <p class="text-center text-gray-400 mb-4">30 Day Money Back Guarantee</p>
+                        }
+
+                        <h3 class="font-medium text-white mb-2">This course includes:</h3>
+                        <ul class="text-gray-300 space-y-1">
+                            <li>@(Model.DurationInMinutes / 60)h @(Model.DurationInMinutes % 60)m of on-demand video</li>
+                            <li>@Model.Lessons.Count lessons</li>
+                            <li>Certificate of completion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Course Content Section -->
+<section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Course Content</h2>
+        <div class="border rounded-lg shadow-md bg-white">
+            <div class="divide-y divide-gray-200">
+                @if (Model.Lessons != null && Model.Lessons.Any())
+                {
+                    foreach (var lesson in Model.Lessons.OrderBy(l => l.Order))
+                    {
+                        <div class="p-4 flex justify-between items-center hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <h3 class="text-lg font-medium text-gray-800">@lesson.Title</h3>
+                            </div>
+                            <span class="text-sm text-gray-500">@lesson.Duration mins</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="p-4 text-center text-gray-500">
+                        No lessons available yet
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Course Status Information -->
+@if (!Model.IsPublished)
+{
+    <section class="py-6 bg-yellow-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rounded-md bg-yellow-100 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">
+                            This course is not published yet
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Call to Action -->
+<section class="py-12 bg-blue-600 text-white text-center">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold mb-4">Ready to Start Learning?</h2>
+        <p class="mb-6">@(Model.Price == 0 ? "Start learning now for free!" : "Enroll now and take your skills to the next level!")</p>
+        <form asp-controller="Enrollment" asp-action="Enroll" method="post">
+            <input type="hidden" name="courseId" value="@Model.Id" />
+            <button type="submit" class="w-48 bg-blue-700 text-white py-3 rounded-lg hover:bg-white hover:text-blue-600 transition duration-300 mb-4 font-medium">
+                @(Model.Price == 0 ? "Start Learning" : "Enroll Now")
+            </button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Toast Auto-Hide
+            setTimeout(() => {
+                document.querySelectorAll('.toast').forEach(toast => {
+                    toast.style.display = 'none';
+                });
+            }, 5000);
+
+            // Reviews Slider Logic
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            const prevReviewBtn = document.getElementById('prevReview');
+            const nextReviewBtn = document.getElementById('nextReview');
+            const reviews = reviewsContainer ? reviewsContainer.children : [];
+            let currentIndex = 0;
+            let autoSlideInterval;
+
+            function showReview(index) {
+                if (reviews.length === 0) return;
+                currentIndex = (index + reviews.length) % reviews.length; // لف الـ Index
+                reviewsContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % reviews.length;
+                    showReview(currentIndex);
+                }, 3000); // تتقلب كل ثانية
+            }
+
+            function stopAutoSlide() {
+                clearInterval(autoSlideInterval);
+            }
+
+            if (reviews.length > 1) {
+                // أسهم التنقل
+                if (prevReviewBtn && nextReviewBtn) {
+                    prevReviewBtn.addEventListener('click', () => {
+                        stopAutoSlide();
+                        showReview(currentIndex - 1);
+                        startAutoSlide();
+                    });
+
+                    nextReviewBtn.addEventListener('click', () => {
+                        stopAutoSlide();
+                        showReview(currentIndex + 1);
+                        startAutoSlide();
+                    });
+                }
+
+                // بدء الـ Auto-Slide
+                startAutoSlide();
+            }
+        });
+    </script>
+}

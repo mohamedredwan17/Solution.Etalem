@@ -45,12 +45,12 @@ namespace Etalem.Areas.Identity.Pages.Instructor.Courses
         public async Task<IActionResult> OnPostAsync()
         {
 
-            ModelState.Remove("ThumbnailUrl");
+            //ModelState.Remove("ThumbnailUrl");
             
-            if (Course.ThumbnailFile == null)
-            {
-                ModelState.Remove("ThumbnailFile");
-            }
+            //if (Course.ThumbnailFile == null)
+            //{
+            //    ModelState.Remove("ThumbnailFile");
+            //}
             if (!ModelState.IsValid)
             {
                 Categories = new SelectList(_context.Categories, "Id", "Name", Course.CategoryId);

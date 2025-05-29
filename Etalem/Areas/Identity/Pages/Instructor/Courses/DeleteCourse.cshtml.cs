@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Etalem.Infrastructure.Services;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Etalem.Models.DTOs.Course;

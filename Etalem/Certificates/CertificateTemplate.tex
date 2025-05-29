@@ -1,0 +1,75 @@
+% Setting up the document class and basic configurations
+\documentclass[a4paper,12pt]{article}
+
+% Including necessary packages for formatting and fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{datetime}
+
+% Configuring page geometry for a certificate layout
+\geometry{top=2cm, bottom=2cm, left=2cm, right=2cm}
+
+% Defining colors for the certificate
+\definecolor{certblue}{RGB}{0, 102, 204}
+\definecolor{certgray}{RGB}{128, 128, 128}
+
+% Customizing section titles for a formal look
+\titleformat{\section}[block]{\centering\Large\bfseries\color{certblue}}{}{0em}{}
+\titleformat{\subsection}[block]{\centering\large\bfseries\color{certgray}}{}{0em}{}
+
+% Removing default page numbering
+\pagestyle{empty}
+
+% Starting the document
+\begin{document}
+
+% Adding a decorative border (simulated with rules)
+\vspace*{-1cm}
+{\color{certblue}\hrule height 2pt}
+\vspace{0.2cm}
+{\color{certblue}\hrule height 1pt}
+\vspace{1cm}
+
+% Certificate title
+\section*{Certificate of Completion}
+
+% Adding some vertical space
+\vspace{1cm}
+
+% Main content of the certificate
+\subsection*{This certifies that}
+{\Large \textbf{Student Name}} % Placeholder for student name
+
+\vspace{0.5cm}
+
+\subsection*{has successfully completed the course}
+{\large \textbf{Course Title}} % Placeholder for course title
+
+\vspace{0.5cm}
+
+\subsection*{on}
+{Completion Date} % Placeholder for completion date
+
+% Adding more vertical space
+\vspace{2cm}
+
+% Signature section
+\begin{center}
+    \begin{tabular}{c c}
+        \makebox[5cm]{\hrulefill} & \makebox[5cm]{\hrulefill} \\
+        Instructor & Date \\
+    \end{tabular}
+\end{center}
+
+% Adding a bottom border
+\vspace{1cm}
+{\color{certblue}\hrule height 1pt}
+\vspace{0.2cm}
+{\color{certblue}\hrule height 2pt}
+
+\end{document}

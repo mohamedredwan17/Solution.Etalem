@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Etalem.Data;
+using Etalem.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
-using Etalem.Infrastructure.Services;
-using Etalem.Data;
 using System.Threading.Tasks;
-using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Etalem.Models.DTOs.Course;
 using Etalem.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Etalem.Areas.Identity.Pages.Instructor.Courses
 {
@@ -20,7 +20,10 @@ namespace Etalem.Areas.Identity.Pages.Instructor.Courses
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CreateCourseModel> _logger;
 
-        public CreateCourseModel(CourseService courseService, ApplicationDbContext context, ILogger<CreateCourseModel> logger)
+        public CreateCourseModel(
+            CourseService courseService,
+            ApplicationDbContext context,
+            ILogger<CreateCourseModel> logger)
         {
             _courseService = courseService;
             _context = context;
@@ -32,47 +35,64 @@ namespace Etalem.Areas.Identity.Pages.Instructor.Courses
 
         public SelectList Categories { get; set; }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGetAsync()
         {
+            _logger.LogInformation("Loading Create Course page");
+
+            var categories = await _context.Categories.ToListAsync();
+            Categories = new SelectList(categories, "Id", "Name");
+
+            if (!categories.Any())
+            {
+                _logger.LogWarning("No categories found in the database");
+                TempData["ErrorMessage"] = "No categories available. Please add a category first.";
+                return RedirectToPage("/Instructor/Categories/Index");
+            }
+
             Course = new CourseDto();
-            Categories = new SelectList(_context.Categories, "Id", "Name");
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            _logger.LogInformation("OnPostAsync called for CreateCourse");
-
-            
+            _logger.LogInformation("Received Course: Title={Title}, CategoryId={CategoryId}, Duration={Duration}",
+                Course.Title, Course.CategoryId, Course.DurationInMinutes);
 
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("ModelState is invalid. Errors: {Errors}", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                Categories = new SelectList(_context.Categories, "Id", "Name");
-                return Page();
-            }
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    _logger.LogWarning("Validation Error: {ErrorMessage}", error.ErrorMessage);
+                }
 
-            if (Course.ThumbnailFile == null)
-            {
-                _logger.LogWarning("ThumbnailFile is null");
-            }
-            else
-            {
-                _logger.LogInformation("ThumbnailFile received: {FileName}, Size: {FileSize}", Course.ThumbnailFile.FileName, Course.ThumbnailFile.Length);
+                // إعادة تحميل الكاتيجوريات في حالة وجود خطأ
+                var categories = await _context.Categories.ToListAsync();
+                Categories = new SelectList(categories, "Id", "Name");
+                return Page();
             }
 
             try
             {
-                var instructorId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var courseId = await _courseService.CreateAsync(Course, instructorId);
+                var instructorId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(instructorId))
+                {
+                    _logger.LogError("Instructor ID not found in user claims");
+                    ModelState.AddModelError(string.Empty, "Unable to identify the instructor.");
+                    var categories = await _context.Categories.ToListAsync();
+                    Categories = new SelectList(categories, "Id", "Name");
+                    return Page();
+                }
+
+                await _courseService.CreateAsync(Course, instructorId);
                 TempData["Message"] = "Course created successfully!";
                 return RedirectToPage("Index");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating course");
-                ModelState.AddModelError("", "An error occurred while creating the course. Please try again.");
-                Categories = new SelectList(_context.Categories, "Id", "Name");
+                ModelState.AddModelError(string.Empty, $"An error occurred: {ex.Message}");
+                var categories = await _context.Categories.ToListAsync();
+                Categories = new SelectList(categories, "Id", "Name");
                 return Page();
             }
         }
